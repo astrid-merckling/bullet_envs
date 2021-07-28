@@ -3,11 +3,8 @@ import numpy as np
 import pybullet
 import os
 import cv2
-try:
-    from SRL4RL.utils.utilsEnv import AddNoise
-except:
-    print('\nCannot import SRL4RL!')
 
+from bullet_envs.utils import AddNoise
 
 from pybullet_utils import bullet_client
 

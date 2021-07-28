@@ -9,11 +9,7 @@ from collections import OrderedDict
 from pybullet_data import getDataPath
 import random
 
-from bullet_envs.utils import seeding_np_random
-try:
-    from SRL4RL.utils.utilsEnv import AddNoise
-except:
-    print('\nCannot import SRL4RL')
+from bullet_envs.utils import seeding_np_random, AddNoise
 
 robot_diameter = 0.4
 

@@ -3,10 +3,7 @@ import gym
 from pybullet_data import getDataPath
 import os, inspect
 
-try:
-    from SRL4RL.utils.utilsEnv import env_with_goals
-except:
-    print('\nCannot import SRL4RL!')
+from bullet_envs.utils import env_with_goals
 
 
 class PybulletEnv(gym.Wrapper):
