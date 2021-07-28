@@ -12,7 +12,7 @@ try:
     import bullet_envs
     bullet_envs_path = bullet_envs.__path__[0]
 except:
-    print('\n Cannot import srl4rl!')
+    print('\nCannot import bullet_envs!')
 
 
 

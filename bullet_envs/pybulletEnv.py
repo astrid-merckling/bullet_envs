@@ -2,23 +2,11 @@ import numpy as np
 import gym
 from pybullet_data import getDataPath
 import os, inspect
-# import bullet_envs
 
-from SRL4RL.utils.utilsEnv import env_with_goals
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-env_dir = os.path.abspath(os.path.join(currentdir, os.pardir))
-
-debug = False
-
-offset = [0, 0, 0]
-_RANDOM_INIT = True
-
-_CONTROL_VELOCITY = CONTROL_POSITION = False
-CONTROL_POSITION = True
-
-
-
+try:
+    from SRL4RL.utils.utilsEnv import env_with_goals
+except:
+    print('\nCannot import SRL4RL!')
 
 
 class PybulletEnv(gym.Wrapper):
@@ -210,5 +198,3 @@ class PybulletEnv(gym.Wrapper):
         if self.env.env.__class__.__name__ == 'ReacherBulletEnv':
             radius = 0.015
         return radius + radius / 2.
-
-# if env_with_goals

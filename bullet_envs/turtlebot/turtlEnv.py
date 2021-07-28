@@ -9,21 +9,34 @@ from collections import OrderedDict
 from pybullet_data import getDataPath
 import random
 
+from bullet_envs.utils import seeding_np_random
 try:
     from SRL4RL.utils.utilsEnv import AddNoise
 except:
-    print('\n Cannot import AddNoise from SRL4RL!')
-from bullet_envs.utils import seeding_np_random
-
-offset = [0, 0, 0]
-_RANDOM_INIT = True
+    print('\nCannot import SRL4RL')
 
 robot_diameter = 0.4
 
 initZ = 0.
 
 
-# TODO: modify also TurtlebotMazeEnv
+class TurtlebotMazeEnv(TurtlebotEnv):
+    def __init__(self, urdf_root=getDataPath(), renders=False, random_target=False, target_pos=None, distractor=False,
+                 actionRepeat=1, maxSteps=100,
+                 image_size=84, color=False, fpv=True, display_target=False, randomExplor=True, noise_type='none',
+                 with_velocity=False, with_ANGLES=False, seed=None, with_target=True,
+                 wallDistractor=False, debug=False):
+        assert fpv, 'TurtlebotMazeEnv-v0 only with fpv'
+        super().__init__(urdf_root=urdf_root, renders=renders, random_target=random_target, target_pos=target_pos,
+                         distractor=distractor, actionRepeat=actionRepeat,
+                         maxSteps=maxSteps,
+                         image_size=image_size, color=color, fpv=fpv, display_target=display_target,
+                         randomExplor=randomExplor, noise_type=noise_type,
+                         with_velocity=with_velocity, with_ANGLES=with_ANGLES, seed=seed,
+                         with_target=with_target, wallDistractor=wallDistractor, debug=debug)
+
+
+
 class TurtlebotEnv(gym.Env):
     def __init__(self, urdf_root=getDataPath(), renders=False, distractor=False,
                  actionRepeat=1, maxSteps=100,
@@ -628,18 +641,3 @@ class TurtlebotEnv(gym.Env):
     def target_radius(self):
         return 0.20
 
-
-class TurtlebotMazeEnv(TurtlebotEnv):
-    def __init__(self, urdf_root=getDataPath(), renders=False, random_target=False, target_pos=None, distractor=False,
-                 actionRepeat=1, maxSteps=100,
-                 image_size=84, color=False, fpv=True, display_target=False, randomExplor=True, noise_type='none',
-                 with_velocity=False, with_ANGLES=False, seed=None, with_target=True,
-                 wallDistractor=False, debug=False):
-        assert fpv, 'TurtlebotMazeEnv-v0 only with fpv'
-        super().__init__(urdf_root=urdf_root, renders=renders, random_target=random_target, target_pos=target_pos,
-                         distractor=distractor, actionRepeat=actionRepeat,
-                         maxSteps=maxSteps,
-                         image_size=image_size, color=color, fpv=fpv, display_target=display_target,
-                         randomExplor=randomExplor, noise_type=noise_type,
-                         with_velocity=with_velocity, with_ANGLES=with_ANGLES, seed=seed,
-                         with_target=with_target, wallDistractor=wallDistractor, debug=debug)
