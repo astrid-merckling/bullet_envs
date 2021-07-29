@@ -61,20 +61,20 @@ class MJCFBaseBulletEnv(gym.Env):
         elif self.__class__.__name__ == 'ReacherBulletEnv':
             self.cam_pos = [0, 0., 0.]
             self._cam_pitch = -90
-            self._cam_yaw = 0
+            self._cam_yaw = 180
             self._cam_yawDebug = 2
             self._cam_dist = 0.5
 
-    def configureCamera(self, args,image_size=64, noise_type='none', color=True):
+    def configureCamera(self, config,image_size=64, noise_type='none', color=True):
         self.image_size = image_size
         self.noise_type = noise_type
         self.color = color
         if self.noise_type != 'none':
-            self.noise_adder = AddNoise(args)
+            self.noise_adder = AddNoise(config)
 
 
-    def configure(self, args):
-        self.robot.args = args
+    # def configure(self, args):
+    #     self.robot.args = args
 
 
     def seed(self, seed=None):
@@ -162,20 +162,14 @@ class MJCFBaseBulletEnv(gym.Env):
         color = self.color if color is None else color
         im_shapes = [image_size, image_size, 3] if color else [image_size, image_size, 1]
 
-        if self.__class__.__name__ == 'ReacherBulletEnv' and not downscaling:
+        if self.__class__.__name__ == 'ReacherBulletEnv' and camera_id == -1:
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
-                cameraTargetPosition=[0.5, -0.4, 0.33],  # [0, 0.35, 0.23],
-                distance=0.1,  # 0.4,
-                yaw=50,  # 180
-                pitch=-41,  # -41,
+                cameraTargetPosition=[0., -0.1, -0.],
+                distance=0.9,
+                yaw=180,
+                pitch=-25,
                 roll=0,
-                upAxisIndex=2)
-            proj_matrix = self._p.computeProjectionMatrixFOV(
-                fov=60, aspect=float(VP_W) / VP_H,
-                nearVal=0.1, farVal=100.0)
-            (_, _, px, _, _) = self._p.getCameraImage(
-                width=VP_W, height=VP_H, viewMatrix=view_matrix,
-                projectionMatrix=proj_matrix, renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
+                upAxisIndex=2)            
         elif (self.physicsClientId >= 0):
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=cam_pos,
                                                                     distance=self._cam_dist,
@@ -183,28 +177,30 @@ class MJCFBaseBulletEnv(gym.Env):
                                                                     pitch=self._cam_pitch,
                                                                     roll=0,
                                                                     upAxisIndex=2)
-            proj_matrix = self._p.computeProjectionMatrixFOV(fov=60,
-                                                             aspect=float(VP_W) /VP_H,
-                                                             nearVal=0.1,
-                                                             farVal=100.0)
-            (_, _, px, _, _) = self._p.getCameraImage(width=VP_W,
-                                                      height=VP_H,
-                                                      viewMatrix=view_matrix,
-                                                      projectionMatrix=proj_matrix,
-                                                      renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
-            try:
-                # Keep the previous orientation of the camera set by the user.
-                con_mode = self._p.getConnectionInfo()['connectionMethod']
-                if con_mode == self._p.SHARED_MEMORY or con_mode == self._p.GUI:
-                    [yaw, pitch, dist] = self._p.getDebugVisualizerCamera()[8:11]
-                    self._p.resetDebugVisualizerCamera(dist, yaw, pitch,cam_pos)
-            except:
-                pass
+        proj_matrix = self._p.computeProjectionMatrixFOV(fov=60,
+                                                         aspect=float(VP_W) /VP_H,
+                                                         nearVal=0.1,
+                                                         farVal=100.0)
+        (_, _, px, _, _) = self._p.getCameraImage(width=VP_W,
+                                                  height=VP_H,
+                                                  viewMatrix=view_matrix,
+                                                  projectionMatrix=proj_matrix,
+                                                  renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
+        try:
+            # Keep the previous orientation of the camera set by the user.
+            con_mode = self._p.getConnectionInfo()['connectionMethod']
+            if con_mode == self._p.SHARED_MEMORY or con_mode == self._p.GUI:
+                [yaw, pitch, dist] = self._p.getDebugVisualizerCamera()[8:11]
+                self._p.resetDebugVisualizerCamera(dist, yaw, pitch,cam_pos)
+        except:
+            pass
 
-        else:
-            px = np.array([[[255, 255, 255, 255]] * VP_W] *VP_H, dtype=np.uint8)
+        # else:
+        #     px = np.array([[[255, 255, 255, 255]] * VP_W] *VP_H, dtype=np.uint8)
         # rgb_array = np.array(px, dtype=np.uint8) (already as np.uint8)
         rgb_array = np.array(px)[:, :, :3].astype(np.float32)
+        # if self.__class__.__name__ == 'ReacherBulletEnv' and camera_id == 0:
+        #     rgb_array = rgb_array.transpose(1, 0, 2)
 
         if not color:
             rgb_array = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2GRAY).astype(np.float32)

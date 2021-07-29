@@ -22,14 +22,13 @@ class Reacher(MJCFBasedRobot):
         self.target_pos = np.hstack([self.target_pos, 0])
         print('target_pos {}'.format(target_pos))
 
-
   def init_goal(self):
       angle = self.np_random.uniform(low=0, high=2 * np.pi)
       radius = self.np_random.uniform(low=.05, high=self.TARG_LIMIT)
       return np.hstack([radius * np.cos(angle), radius * np.sin(angle), 0])
 
 
-  def robot_specific_reset(self, bullet_client):
+  def reset_goal(self):
       if self.random_target:
           self.target_pos = self.init_goal()
       elif self.target_pos is None:
@@ -38,6 +37,9 @@ class Reacher(MJCFBasedRobot):
       self.jdict["target_x"].reset_current_position(self.target_pos[0], 0)
       self.jdict["target_y"].reset_current_position(self.target_pos[1], 0)
 
+
+  def robot_specific_reset(self, bullet_client):
+      self.reset_goal()
       self.fingertip = self.parts["fingertip"]
       self.target = self.parts["target"]
       self.central_joint = self.jdict["joint0"]
@@ -45,6 +47,9 @@ class Reacher(MJCFBasedRobot):
       if self.randomExplor:
         self.central_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
         self.elbow_joint.reset_current_position(self.np_random.uniform(low=-2.65, high=2.65), 0)
+      else:
+          self.central_joint.reset_current_position(-0.3, 0)
+          self.elbow_joint.reset_current_position(1.54, 0)
 
       if self.distractor:
           angle = self.np_random.uniform(0, 2 * np.pi)

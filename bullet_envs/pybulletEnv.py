@@ -56,7 +56,7 @@ class PybulletEnv(gym.Wrapper):
         self.action_space.seed(seed)
         self.observation_space.seed(seed)
 
-        self.env.env.configureCamera(self, image_size=self.image_size, noise_type=self.noise_type, color=self.color)
+        self.env.env.configureCamera(self.__dict__, image_size=self.image_size, noise_type=self.noise_type, color=self.color)
         self.rewardFactor = actionRepeat if env_name != 'ReacherBulletEnv-v0' else 1
 
     @property
@@ -95,7 +95,7 @@ class PybulletEnv(gym.Wrapper):
         seed = self.env.seed(seed)[0]
         self.action_space.seed(seed)
         self.observation_space.seed(seed)
-        return seed
+        self._seed = seed
         # if seed is not None:
         #     self.seedValue = seed
         #     self.np_random = np.random
@@ -192,6 +192,6 @@ class PybulletEnv(gym.Wrapper):
 
     @property
     def target_radius(self):
-        if self.env.env.__class__.__name__ == 'ReacherBulletEnv':
-            radius = 0.015
+        if self.env.env.__class__.__name__ + '-v0' in env_with_goals:
+            radius = self.env.env.target_radius
         return radius + radius / 2.

@@ -166,8 +166,7 @@ class TurtlebotEnv(gym.Env):
                 self._p.disconnect()
         self.physicsClientId = -1
 
-    def render(self, mode='rgb_array', image_size=None, color=None, close=False, camera_id=0,
-               fpv=None, downscaling=True):
+    def render(self, mode='rgb_array', image_size=None, color=None, close=False, camera_id=0,fpv=None, downscaling=True):
 
         if mode == 'rgb_array':
             if downscaling:

@@ -25,7 +25,10 @@ class AddNoise(object):
         self.noise_type = config['noise_type']
         self.image_size = config['image_size']
         if 'random_state' not in config:
-            self.random_state = np.random.RandomState(seed=config['seed'])
+            try:
+                self.random_state = np.random.RandomState(seed=config['_seed'])
+            except:
+                self.random_state = np.random.RandomState(seed=config['seed'])
         else:
             self.random_state = config['random_state']
 
