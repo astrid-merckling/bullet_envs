@@ -63,13 +63,14 @@ class Reacher(MJCFBasedRobot):
     self.elbow_joint.set_motor_torque(0.05 * float(np.clip(a[1], -1, +1)))
 
   def calc_state(self):
-    theta, self.theta_dot = self.central_joint.current_relative_position()
+    self.theta, self.theta_dot = self.central_joint.current_relative_position()
     self.gamma, self.gamma_dot = self.elbow_joint.current_relative_position()
     self.to_target_vec = np.array(self.fingertip.pose().xyz()) - np.array(self.target.pose().xyz())
     return np.array([
         *self.fingertip.pose().xyz()[:2],
-        np.cos(theta),
-        np.sin(theta),
+        # np.cos(self.theta),
+        # np.sin(self.theta),
+        self.theta,
         self.theta_dot,
         self.gamma,
         self.gamma_dot,
