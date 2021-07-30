@@ -52,10 +52,10 @@ class Reacher(MJCFBasedRobot):
           self.elbow_joint.reset_current_position(1.54, 0)
 
       if self.distractor:
-          angle = self.np_random.uniform(0, 2 * np.pi)
-          radius = self.np_random.uniform(.05, self.TARG_LIMIT)
-          self.jdict["distractor_x"].reset_current_position(radius * np.cos(angle), self.np_random.uniform(-0.5, 0.5))
-          self.jdict["distractor_y"].reset_current_position(radius * np.sin(angle), self.np_random.uniform(-0.5, 0.5))
+          angle = np.random.uniform(0, 2 * np.pi)
+          radius = np.random.uniform(.05, self.TARG_LIMIT)
+          self.jdict["distractor_x"].reset_current_position(radius * np.cos(angle), np.random.uniform(-0.5, 0.5))
+          self.jdict["distractor_y"].reset_current_position(radius * np.sin(angle), np.random.uniform(-0.5, 0.5))
 
   def apply_action(self, a):
     assert (np.isfinite(a).all())

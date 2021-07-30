@@ -7,8 +7,7 @@ from bullet_envs.utils import env_with_goals
 
 
 class PybulletEnv(gym.Wrapper):
-    def __init__(self, env_name, urdf_root=getDataPath(), renders=False, distractor=False, noisyObs=False,
-                 actionRepeat=1,  maxSteps=100,
+    def __init__(self, env_name, urdf_root=getDataPath(), renders=False, distractor=False, actionRepeat=1,  maxSteps=100,
                  image_size=84, color=False, fpv=False, noise_type='none', seed=0,doneAlive=True,
                  randomExplor=True,random_target=True,target_pos=None, display_target=False):
         if env_name == 'ReacherBulletEnv-v0':
@@ -31,7 +30,6 @@ class PybulletEnv(gym.Wrapper):
         self.numSolverIterations = 150
         self._timeStep = 0.01
         self.distractor = distractor
-        self.noisyObs = noisyObs
         self.envStepCounter = 0
         self._urdf_root = urdf_root + '/'
         self.walls = None
