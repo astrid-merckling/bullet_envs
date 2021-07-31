@@ -32,3 +32,10 @@ git clone https://github.com/astrid-merckling/bullet_envs.git
 cd bullet_envs
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 ```
+
+
+
+# Demo
+
+{{< youtube id="cbuaNd3Rm1w" title="Four PyBullet environments fully compatible with OpenAI GYM
+" >}}
