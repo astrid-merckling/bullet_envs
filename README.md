@@ -38,7 +38,7 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 # Demo
 
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/cbuaNd3Rm1w/0.jpg)](https://youtu.be/cbuaNd3Rm1w)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/cbuaNd3Rm1w/hqdefault.jpg)](https://youtu.be/cbuaNd3Rm1w)
 
 
 
