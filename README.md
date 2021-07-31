@@ -39,6 +39,15 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 
 
 <!-- [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://youtu.be/cbuaNd3Rm1w) -->
-![](https://youtu.be/cbuaNd3Rm1w)
+<!-- ![](https://youtu.be/cbuaNd3Rm1w) -->
 
 
+<iframe
+    width="640"
+    height="480"
+    src="https://youtu.be/cbuaNd3Rm1w"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+>
+</iframe>
