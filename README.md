@@ -37,5 +37,8 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 
 # Demo
 
-{{< youtube id="cbuaNd3Rm1w" title="Four PyBullet environments fully compatible with OpenAI GYM
-" >}}
+
+<!-- [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://youtu.be/cbuaNd3Rm1w) -->
+[demo](https://youtu.be/cbuaNd3Rm1w)
+
+
