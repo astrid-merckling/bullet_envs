@@ -7,7 +7,6 @@ import gym
 from datetime import datetime
 from collections import OrderedDict
 from pybullet_data import getDataPath
-import random
 
 from bullet_envs.utils import seeding_np_random, AddNoise
 
@@ -188,7 +187,8 @@ class TurtlebotEnv(gym.Env):
         if 'plate' in self.noise_type:
             self.noise_adder(self._p, im_shapes=im_shapes)
 
-        if camera_id == -1 and not fpv:
+        if camera_id == -1:
+            assert not fpv
             "presentation view of the environment"
             if self.class_name == 'TurtlebotEnv':
                 cameraTargetPosition = [self._max_x / 2. + 0.8, self._max_y / 1.4 - 2, 1.6]
@@ -196,11 +196,11 @@ class TurtlebotEnv(gym.Env):
                 pitch = -40
             else:
                 yaw = 180
-                pitch = -25
-                cameraTargetPosition = (self._max_x / 2., 2 * self._max_y - self._max_y / 6, 3.3)
+                pitch = -45
+                cameraTargetPosition = (self._max_x / 2., 2 * self._max_y - self._max_y / 6 - 2, 3.3)
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
                 cameraTargetPosition=cameraTargetPosition,
-                distance=1,
+                distance=2,
                 yaw=yaw,
                 pitch=pitch,
                 roll=self._cam_roll,
@@ -211,7 +211,8 @@ class TurtlebotEnv(gym.Env):
             (_, _, px1, _, _) = self._p.getCameraImage(
                 width=VP_W, height=VP_H, viewMatrix=view_matrix,
                 projectionMatrix=proj_matrix, renderer=self.renderer)
-        elif camera_id == 1 and not fpv:
+        elif camera_id == 1:
+            assert not fpv
             "map view of the environment"
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
                 cameraTargetPosition=self.camera_target_pos,
@@ -263,19 +264,19 @@ class TurtlebotEnv(gym.Env):
     def init_goal(self):
         margin = self.wallLimit
         if self.class_name == 'TurtlebotMazeEnv':
-            zone = np.random.randint(1, 4)
+            zone = self.np_random.randint(1, 4)
             if zone == 1:  # left
-                x_pos = np.random.uniform(0 + margin, 1.50 * 4 - margin)
-                y_pos = np.random.uniform(0 + margin, 1.50 - margin)
+                x_pos = self.np_random.uniform(0 + margin, 1.50 * 4 - margin)
+                y_pos = self.np_random.uniform(0 + margin, 1.50 - margin)
             elif zone == 2:  # right
-                x_pos = np.random.uniform(0 + margin, 1.50 * 4 - margin)
-                y_pos = np.random.uniform(1.50 * 2 + margin, 1.50 * 3 - margin)
+                x_pos = self.np_random.uniform(0 + margin, 1.50 * 4 - margin)
+                y_pos = self.np_random.uniform(1.50 * 2 + margin, 1.50 * 3 - margin)
             elif zone == 3:  # top
-                x_pos = np.random.uniform(0 + margin, 1.50 - margin)
-                y_pos = np.random.uniform(1.50 + margin, 2 * 1.50 - margin)
+                x_pos = self.np_random.uniform(0 + margin, 1.50 - margin)
+                y_pos = self.np_random.uniform(1.50 + margin, 2 * 1.50 - margin)
         else:
-            x_pos = np.random.uniform(self._min_x + margin, self._max_x - margin)
-            y_pos = np.random.uniform(self._min_y + margin, self._max_y - margin)
+            x_pos = self.np_random.uniform(self._min_x + margin, self._max_x - margin)
+            y_pos = self.np_random.uniform(self._min_y + margin, self._max_y - margin)
         return np.hstack([x_pos, y_pos, 0])
 
     def _reset(self):
@@ -522,7 +523,7 @@ class TurtlebotEnv(gym.Env):
     def step(self, action_):
 
         if self.wallDistractor:
-            c = list(np.array([random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255]) / 255.)
+            c = list(np.array([np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255), 255]) / 255.)
             self._p.changeVisualShape(self.walls[-1], -1, rgbaColor=c)
         self.has_bumped = False
 
