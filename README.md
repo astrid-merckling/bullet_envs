@@ -35,23 +35,8 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 
 
 
-# Demo
+# Watch a Demo
 
 
-[![Four PyBullet environments fully compatible with OpenAI GYM](https://img.youtube.com/vi/cbuaNd3Rm1w/maxresdefault.jpg)](https://youtu.be/cbuaNd3Rm1w)
+https://user-images.githubusercontent.com/62666911/127750186-edc10635-2290-4c1c-9d96-a864ad52b3cc.mp4
 
-
-<!--  <iframe src="https://www.youtube.com/embed/cbuaNd3Rm1w?autoplay=1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe> -->
-
-
-
-
-<iframe
-    width="640"
-    height="480"
-    src="https://www.youtube.com/embed/cbuaNd3Rm1w"
-    frameborder="0"
-    allow="autoplay; encrypted-media"
-    allowfullscreen
->
-</iframe>
