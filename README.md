@@ -1,4 +1,10 @@
 
+# Watch a Demo
+
+
+https://user-images.githubusercontent.com/62666911/127750313-ddf991db-b7f3-429a-a292-3b9098cddf3a.mp4
+
+
 
 # bullet_envs
 
@@ -33,12 +39,6 @@ cd bullet_envs
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 ```
 
-
-
-# Watch a Demo
-
-
-https://user-images.githubusercontent.com/62666911/127750313-ddf991db-b7f3-429a-a292-3b9098cddf3a.mp4
 
 
 
