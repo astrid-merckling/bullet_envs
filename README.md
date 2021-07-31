@@ -38,8 +38,8 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 # Demo
 
 
-<!-- [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/cbuaNd3Rm1w/hqdefault.jpg)](https://youtu.be/cbuaNd3Rm1w)
- -->
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/cbuaNd3Rm1w/hqdefault.jpg)](https://youtu.be/cbuaNd3Rm1w)
+
 
 
 <!--  <iframe src="https://www.youtube.com/embed/cbuaNd3Rm1w?autoplay=1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe> -->
@@ -51,8 +51,6 @@ then add allow='autoplay' attribute to your iframe element
 -->
 <iframe src="https://www.youtube.com/embed/cbuaNd3Rm1w?autoplay=1" allow='autoplay'></iframe>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/cbuaNd3Rm1w" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/cbuaNd3Rm1w" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<p><div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" id="youtubeplayer" type="text/html" width="640" height="390"
+  src="//www.youtube.com/embed/cbuaNd3Rm1w"
+  frameborder="0"/></div></p>
