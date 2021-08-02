@@ -9,9 +9,9 @@ https://user-images.githubusercontent.com/62666911/127876105-f851cf18-5793-4cff-
 
 # bullet_envs
 
-It is a library that provides environments similar to those provided by [MuJoCo](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.296.6848&rep=rep1&type=pdf) which are fully compatible with [OpenAI Gym](https://arxiv.org/abs/1606.01540), with the difference of being open-source.
+It is a library that provides [PyBullet](http://pybullet.org) environments similar to those provided by [MuJoCo](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.296.6848&rep=rep1&type=pdf) which are fully compatible with [OpenAI Gym](https://arxiv.org/abs/1606.01540), with the difference of being open-source.
 
-It is based on the original environments provided in [pybullet_envs](https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/gym/pybullet_envs).
+It is based on the original [PyBullet](http://pybullet.org) environments provided in [pybullet_envs](https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/gym/pybullet_envs).
 
 
 Only the following environments are fully supported:
