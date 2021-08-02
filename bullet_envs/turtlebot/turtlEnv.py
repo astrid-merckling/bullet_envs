@@ -18,7 +18,7 @@ initZ = 0.
 class TurtlebotEnv(gym.Env):
     def __init__(self, urdf_root=getDataPath(), renders=False, distractor=False,
                  actionRepeat=1, maxSteps=100,
-                 image_size=84, color=False, fpv=False, randomExplor=True, noise_type='none',
+                 image_size=64, color=True, fpv=False, randomExplor=True, noise_type='none',
                  with_velocity=False, with_ANGLES=False, seed=None,
                  with_target=True, wallDistractor=False, random_target=False, target_pos=None, display_target=False,
                  debug=False):
@@ -47,24 +47,18 @@ class TurtlebotEnv(gym.Env):
         self._urdf_root = urdf_root + '/'
         self.walls = None
 
-        if self.class_name == 'TurtlebotMazeEnv':
-            self.collision_margin = 0.25
-            self.wallLimit = self.collision_margin + robot_diameter / 2
-            self._min_x, self._max_x = 0., 1.50 * 4
-            self._min_y, self._max_y = 0., 1.50 * 3
-            self.posMultiplier = 4 * (1.50 * 3 - self.wallLimit) / 64
-            self._cam_dist = self._max_x
-            self.camera_target_pos = (self._max_x / 2., self._max_y / 2., 0)
-        else:
-            self.collision_margin = 0.2
-            self.wallLimit = self.collision_margin + robot_diameter / 2
-            # Boundaries of the square env
-            camera_size = robot_diameter * 100 / 20
-            self._min_x, self._max_x = 0., camera_size
-            self._min_y, self._max_y = 0., camera_size
-            self.posMultiplier = 4 * (min(self._max_x,self._max_y) - self.wallLimit) / 64  # to move 4 pixels in a 64x64 image
-            self._cam_dist = 0.85 * self._max_x  # 4.2 #5.2
-            self.camera_target_pos = (self._max_x / 2., self._max_y / 2., 0)
+        self._cam_roll = 0
+        self.collision_margin = 0.25
+        self.wallLimit = self.collision_margin + robot_diameter / 2
+        self._min_x, self._max_x = 0., 1.50 * 4
+        self._min_y, self._max_y = 0., 1.50 * 3
+        self.posMultiplier = 4 * (1.50 * 3 - self.wallLimit) / 64
+
+        self._cam_pos = [3., 6.25, 3.3]
+        self._cam_dist = 2
+        self._cam_yaw = 180
+        self._cam_pitch = -45
+
 
         self.speedMultiplier = 66
         # Target
@@ -95,9 +89,6 @@ class TurtlebotEnv(gym.Env):
         "include stochastic dynamics transition"
         self.wallDistractor = wallDistractor
 
-        self._cam_yaw = 90
-        self._cam_pitch = -90
-        self._cam_roll = 0
         self.renderer = pybullet.ER_BULLET_HARDWARE_OPENGL
 
         self.stateId = -1
@@ -167,42 +158,28 @@ class TurtlebotEnv(gym.Env):
 
     def render(self, mode='rgb_array', image_size=None, color=None, close=False, camera_id=0,fpv=None, downscaling=True):
 
-        if mode == 'rgb_array':
-            if downscaling:
-                VP_W = self.state_w
-                VP_H = self.state_h
-            else:
-                VP_W = image_size
-                VP_H = image_size
+        if mode == "human":
+            return np.array([])
+        if downscaling:
+            VP_W = self.state_w
+            VP_H = self.state_h
         else:
-            VP_W = self.window_w
-            VP_H = self.window_h
+            VP_W = image_size
+            VP_H = image_size            
 
         image_size = self.image_size if image_size is None else image_size
         color = self.color if color is None else color
         im_shapes = [image_size, image_size, 3] if color else [image_size, image_size, 1]
         fpv = self.fpv if fpv is None else fpv
 
-        # for 'plate' noise
-        if 'plate' in self.noise_type:
-            self.noise_adder(self._p, im_shapes=im_shapes)
-
         if camera_id == -1:
             assert not fpv
             "presentation view of the environment"
-            if self.class_name == 'TurtlebotEnv':
-                cameraTargetPosition = [self._max_x / 2. + 0.8, self._max_y / 1.4 - 2, 1.6]
-                yaw = 30
-                pitch = -40
-            else:
-                yaw = 180
-                pitch = -45
-                cameraTargetPosition = (self._max_x / 2., 2 * self._max_y - self._max_y / 6 - 2, 3.3)
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
-                cameraTargetPosition=cameraTargetPosition,
-                distance=2,
-                yaw=yaw,
-                pitch=pitch,
+                cameraTargetPosition=self._cam_pos,
+                distance=self._cam_dist,
+                yaw=self._cam_yaw,
+                pitch=self._cam_pitch,
                 roll=self._cam_roll,
                 upAxisIndex=2)
             proj_matrix = self._p.computeProjectionMatrixFOV(
@@ -215,10 +192,10 @@ class TurtlebotEnv(gym.Env):
             assert not fpv
             "map view of the environment"
             view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
-                cameraTargetPosition=self.camera_target_pos,
-                distance=self._cam_dist,
+                cameraTargetPosition=(self._max_x / 2., self._max_y / 2., 0),
+                distance=self._max_x,
                 yaw=180,
-                pitch=self._cam_pitch,
+                pitch=-90,
                 roll=self._cam_roll,
                 upAxisIndex=2)
             proj_matrix = self._p.computeProjectionMatrixFOV(
@@ -285,7 +262,8 @@ class TurtlebotEnv(gym.Env):
 
             if self.renders:
                 self._p = bullet_client.BulletClient(connection_mode=pybullet.GUI)
-                self._p.resetDebugVisualizerCamera(3, 180, -41, [self._max_x / 2. + 1, self._max_y / 1.4, 1.])
+                self._p.resetDebugVisualizerCamera(cameraTargetPosition = self._cam_pos,
+                    cameraDistance=self._cam_dist, cameraYaw =self._cam_yaw, cameraPitch=self._cam_pitch)
             else:
                 self._p = bullet_client.BulletClient()
 
@@ -383,9 +361,6 @@ class TurtlebotEnv(gym.Env):
         self.turn = 0
         self.leftWheelVelocity = 0
         self.rightWheelVelocity = 0
-
-        if 'plate' in self.noise_type:
-            self.noise_adder.reset(self._p)
 
         if self.with_target:
             "Initialize target position"
@@ -624,7 +599,7 @@ class TurtlebotEnv(gym.Env):
 class TurtlebotMazeEnv(TurtlebotEnv):
     def __init__(self, urdf_root=getDataPath(), renders=False, random_target=False, target_pos=None, distractor=False,
                  actionRepeat=1, maxSteps=100,
-                 image_size=84, color=False, fpv=True, display_target=False, randomExplor=True, noise_type='none',
+                 image_size=64, color=True, fpv=True, display_target=False, randomExplor=True, noise_type='none',
                  with_velocity=False, with_ANGLES=False, seed=None, with_target=True,
                  wallDistractor=False, debug=False):
         assert fpv, 'TurtlebotMazeEnv-v0 only with fpv'

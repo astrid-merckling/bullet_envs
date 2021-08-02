@@ -29,41 +29,40 @@ class MJCFBaseBulletEnv(gym.Env):
 
     metadata = {'render.modes': ['human', 'rgb_array'], 'video.frames_per_second': 60}
 
-    def __init__(self, robot, render=False, doneAlive=True, actionRepeat=1,seed=None):
+    def __init__(self, robot, renders=False, doneAlive=True, actionRepeat=1,seed=None):
         self.actionRepeat = actionRepeat
         self.doneAlive = doneAlive
         self.scene = None
         self.physicsClientId = -1
         self.ownsPhysicsClient = 0
         self.camera = Camera()
-        self.isRender = render
+        self.renders = renders
         self.robot = robot
         self.seedValue = seed
         self.seed(seed)
         self._cam_dist = 3
-        self._cam_yaw = self._cam_yawDebug = 0
+        self._cam_yaw = 0
         self._cam_pitch = 0 #old:-30 more simple to predict camera with zero pitch
         # self._render_width = 320
         # self._render_height = 240
 
         self.action_space = robot.action_space
         self.observation_space = robot.observation_space
-        self.cam_pos = [0,0.5,2.]
+        self._cam_pos = [0,0.5,2.]
         if self.__class__.__name__ == 'InvertedPendulumSwingupBulletEnv':
-            self.cam_pos=[0,1.5,1]#[0,1.8,.0]
+            self._cam_pos=[0,0.5,1]#[0,1.8,.0]
         elif self.__class__.__name__ == 'InvertedDoublePendulumBulletEnv':
-            self.cam_pos = [0, 1, 1]
+            self._cam_pos = [0, 0.2, 1]
         elif self.__class__.__name__ in ['AntBulletEnv']:
             "TODO later"
             self._cam_pitch = -60
             self._cam_yaw = 0
             self._cam_dist = 2.5
         elif self.__class__.__name__ == 'ReacherBulletEnv':
-            self.cam_pos = [0, 0., 0.]
-            self._cam_pitch = -90
-            self._cam_yaw = 180
-            self._cam_yawDebug = 2
-            self._cam_dist = 0.5
+            self._cam_pos = [0., -0.1, -0.]
+            self._cam_dist = 0.9
+            self._cam_yaw = 2
+            self._cam_pitch = -25
 
     def configureCamera(self, config,image_size=64, noise_type='none', color=True):
         self.image_size = image_size
@@ -87,8 +86,12 @@ class MJCFBaseBulletEnv(gym.Env):
         if (self.physicsClientId < 0):
             self.ownsPhysicsClient = True
 
-            if self.isRender:
+            if self.renders:
                 self._p = bullet_client.BulletClient(connection_mode=pybullet.GUI)
+                self._p.resetDebugVisualizerCamera(cameraTargetPosition=self._cam_pos,
+                                                   cameraDistance=self._cam_dist,
+                                                   cameraYaw=self._cam_yaw,
+                                                   cameraPitch=self._cam_pitch)
             else:
                 self._p = bullet_client.BulletClient()
             self._p.resetSimulation()
@@ -127,30 +130,6 @@ class MJCFBaseBulletEnv(gym.Env):
 
     def render(self, mode='rgb_array', image_size=None, color=None, close=False,camera_id=0,downscaling=True):
 
-        cam_pos=self.cam_pos
-        if (hasattr(self, 'robot')):
-            if (hasattr(self.robot, 'body_xyz')):
-                cam_pos = self.robot.robot_body.pose().xyz()
-                if self.__class__.__name__ == 'HalfCheetahBulletEnv':
-                    cam_pos[1] += 1.
-                    cam_pos[2] = 1.
-                elif self.__class__.__name__ in ['HopperBulletEnv','Walker2DBulletEnv']:
-                    cam_pos[1] += 1.
-                    cam_pos[2] = 1
-                elif self.__class__.__name__ in ['AntBulletEnv']:
-                    cam_pos[1] += 0.
-                    cam_pos[2] = 0.5
-        if self.__class__.__name__ in ['InvertedPendulumSwingupBulletEnv','InvertedDoublePendulumBulletEnv']:
-            cam_pos[0],_ = self.robot.slider.current_position()
-
-        if mode == "human":
-            self.isRender = True
-            self._p.resetDebugVisualizerCamera(cameraDistance=self._cam_dist,
-                                               cameraYaw=self._cam_yawDebug,
-                                               cameraPitch=self._cam_pitch,
-                                               cameraTargetPosition=cam_pos)
-        if mode != "rgb_array":
-            return np.array([])
         if downscaling:
             VP_W = STATE_W
             VP_H = STATE_H
@@ -162,21 +141,49 @@ class MJCFBaseBulletEnv(gym.Env):
         color = self.color if color is None else color
         im_shapes = [image_size, image_size, 3] if color else [image_size, image_size, 1]
 
-        if self.__class__.__name__ == 'ReacherBulletEnv' and camera_id == -1:
-            view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
-                cameraTargetPosition=[0., -0.1, -0.],
-                distance=0.9,
-                yaw=180,
-                pitch=-25,
-                roll=0,
-                upAxisIndex=2)            
-        elif (self.physicsClientId >= 0):
-            view_matrix = self._p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=cam_pos,
-                                                                    distance=self._cam_dist,
-                                                                    yaw=self._cam_yaw,
-                                                                    pitch=self._cam_pitch,
-                                                                    roll=0,
-                                                                    upAxisIndex=2)
+        cam_pos = self._cam_pos.copy()
+        cam_dist = self._cam_dist
+        cam_yaw = self._cam_yaw
+        cam_pitch = self._cam_pitch
+        if camera_id >= 0:
+            if self.__class__.__name__ == 'ReacherBulletEnv':
+                cam_pos = [0, 0., 0.]
+                cam_pitch = -90
+                cam_yaw = 180
+                cam_dist = 0.5
+            if self.__class__.__name__ in ['InvertedPendulumSwingupBulletEnv', 'InvertedDoublePendulumBulletEnv']:
+                if self.__class__.__name__ == 'InvertedPendulumSwingupBulletEnv':
+                    cam_pos = [0, 1.5, 1]
+                elif self.__class__.__name__ == 'InvertedDoublePendulumBulletEnv':
+                    cam_pos = [0, 1, 1]
+                cam_pos[0], _ = self.robot.slider.current_position()
+        if (hasattr(self, 'robot')):
+            if (hasattr(self.robot, 'body_xyz')):
+                cam_pos = self.robot.robot_body.pose().xyz()
+                if self.__class__.__name__ == 'HalfCheetahBulletEnv':
+                    cam_pos[1] += 1.
+                    cam_pos[2] = 1.
+                elif self.__class__.__name__ in ['HopperBulletEnv', 'Walker2DBulletEnv']:
+                    cam_pos[1] += 1.
+                    cam_pos[2] = 1
+                elif self.__class__.__name__ in ['AntBulletEnv']:
+                    cam_pos[1] += 0.
+                    cam_pos[2] = 0.5
+
+
+        if mode == "human":
+            if self.__class__.__name__ in ['HalfCheetahBulletEnv','HopperBulletEnv', 'Walker2DBulletEnv','AntBulletEnv']:
+                self._p.resetDebugVisualizerCamera(cameraTargetPosition=cam_pos,
+                                                   cameraDistance=cam_dist,
+                                                   cameraYaw=cam_yaw,
+                                                   cameraPitch=cam_pitch,)
+            return np.array([])
+        view_matrix = self._p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=cam_pos,
+                                                                distance=cam_dist,
+                                                                yaw=cam_yaw,
+                                                                pitch=cam_pitch,
+                                                                roll=0,
+                                                                upAxisIndex=2)
         proj_matrix = self._p.computeProjectionMatrixFOV(fov=60,
                                                          aspect=float(VP_W) /VP_H,
                                                          nearVal=0.1,
@@ -186,21 +193,8 @@ class MJCFBaseBulletEnv(gym.Env):
                                                   viewMatrix=view_matrix,
                                                   projectionMatrix=proj_matrix,
                                                   renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
-        try:
-            # Keep the previous orientation of the camera set by the user.
-            con_mode = self._p.getConnectionInfo()['connectionMethod']
-            if con_mode == self._p.SHARED_MEMORY or con_mode == self._p.GUI:
-                [yaw, pitch, dist] = self._p.getDebugVisualizerCamera()[8:11]
-                self._p.resetDebugVisualizerCamera(dist, yaw, pitch,cam_pos)
-        except:
-            pass
 
-        # else:
-        #     px = np.array([[[255, 255, 255, 255]] * VP_W] *VP_H, dtype=np.uint8)
-        # rgb_array = np.array(px, dtype=np.uint8) (already as np.uint8)
         rgb_array = np.array(px)[:, :, :3].astype(np.float32)
-        # if self.__class__.__name__ == 'ReacherBulletEnv' and camera_id == 0:
-        #     rgb_array = rgb_array.transpose(1, 0, 2)
 
         if not color:
             rgb_array = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2GRAY).astype(np.float32)

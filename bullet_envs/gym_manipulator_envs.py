@@ -7,9 +7,9 @@ from robot_manipulators import Reacher, Pusher, Striker, Thrower
 
 class ReacherBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,random_target=True, target_pos=None,display_target=False, seed=None):
+  def __init__(self, renders=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,random_target=True, target_pos=None,display_target=False, seed=None):
     self.robot = Reacher(randomExplor=randomExplor,distractor=distractor,random_target=random_target, target_pos=target_pos,display_target=display_target)
-    MJCFBaseBulletEnv.__init__(self, self.robot, render,doneAlive,actionRepeat,seed)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
     self.target_radius = 0.015
 
   # def create_single_player_scene(self, bullet_client):
@@ -58,9 +58,9 @@ class ReacherBulletEnv(MJCFBaseBulletEnv):
 
 class PusherBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False):
+  def __init__(self, renders=False):
     self.robot = Pusher()
-    MJCFBaseBulletEnv.__init__(self, self.robot, render)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders)
 
   # def create_single_player_scene(self, bullet_client):
   #   return SingleRobotEmptyScene(bullet_client, gravity=9.81, timestep=0.0020, frame_skip=5)
@@ -121,9 +121,9 @@ class PusherBulletEnv(MJCFBaseBulletEnv):
 
 class StrikerBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False):
+  def __init__(self, renders=False):
     self.robot = Striker()
-    MJCFBaseBulletEnv.__init__(self, self.robot, render)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders)
     self._striked = False
     self._min_strike_dist = np.inf
     self.strike_threshold = 0.1
@@ -206,9 +206,9 @@ class StrikerBulletEnv(MJCFBaseBulletEnv):
 
 class ThrowerBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False):
+  def __init__(self, renders=False):
     self.robot = Thrower()
-    MJCFBaseBulletEnv.__init__(self, self.robot, render)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders)
 
   # def create_single_player_scene(self, bullet_client):
   #   return SingleRobotEmptyScene(bullet_client, gravity=0.0, timestep=0.0020, frame_skip=5)

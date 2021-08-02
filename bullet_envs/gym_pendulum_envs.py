@@ -10,9 +10,9 @@ import os, sys
 
 class InvertedPendulumBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+  def __init__(self, renders=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
     self.robot = InvertedPendulum(randomExplor=randomExplor)
-    MJCFBaseBulletEnv.__init__(self, self.robot, render,doneAlive,actionRepeat,seed)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
     self.stateId = -1
 
   # def create_single_player_scene(self, bullet_client):
@@ -52,17 +52,17 @@ class InvertedPendulumBulletEnv(MJCFBaseBulletEnv):
 
 class InvertedPendulumSwingupBulletEnv(InvertedPendulumBulletEnv):
 
-  def __init__(self, render=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+  def __init__(self, renders=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
     self.robot = InvertedPendulumSwingup(randomExplor=randomExplor)
-    MJCFBaseBulletEnv.__init__(self, self.robot, render,doneAlive,actionRepeat,seed)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
     self.stateId = -1
 
 
 class InvertedDoublePendulumBulletEnv(MJCFBaseBulletEnv):
 
-  def __init__(self, render=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+  def __init__(self, renders=False,doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
     self.robot = InvertedDoublePendulum(randomExplor=randomExplor)
-    MJCFBaseBulletEnv.__init__(self, self.robot, render,doneAlive,actionRepeat,seed)
+    MJCFBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
     self.stateId = -1
 
   def create_single_player_scene(self, bullet_client):

@@ -8,14 +8,14 @@ from bullet_envs.utils import env_with_goals
 
 class PybulletEnv(gym.Wrapper):
     def __init__(self, env_name, urdf_root=getDataPath(), renders=False, distractor=False, actionRepeat=1,  maxSteps=100,
-                 image_size=84, color=False, fpv=False, noise_type='none', seed=0,doneAlive=True,
+                 image_size=64, color=True, fpv=False, noise_type='none', seed=0,doneAlive=True,
                  randomExplor=True,random_target=True,target_pos=None, display_target=False):
         if env_name == 'ReacherBulletEnv-v0':
-            env = gym.make(env_name, render=renders, doneAlive=doneAlive, actionRepeat=actionRepeat,
+            env = gym.make(env_name, renders=renders, doneAlive=doneAlive, actionRepeat=actionRepeat,
                        randomExplor=randomExplor,distractor=distractor,random_target=random_target,
                            target_pos=target_pos,display_target=display_target, seed=seed)
         else:
-            env = gym.make(env_name, render=renders, doneAlive=doneAlive, actionRepeat=actionRepeat,
+            env = gym.make(env_name, renders=renders, doneAlive=doneAlive, actionRepeat=actionRepeat,
                            randomExplor=randomExplor, distractor=distractor, seed=seed)
         gym.Wrapper.__init__(self, env)
         self.renders = renders
@@ -94,14 +94,7 @@ class PybulletEnv(gym.Wrapper):
         self.action_space.seed(seed)
         self.observation_space.seed(seed)
         self._seed = seed
-        # if seed is not None:
-        #     self.seedValue = seed
-        #     self.np_random = np.random
-        #     self.np_random.seed(seed)
-        #     self.random = random
-        #     self.random.seed(seed)
-        #     self.env.seed(seed)
-
+        
     def render(self, mode='rgb_array', image_size=None, color=None, close=False, camera_id=0, fpv=False,
                downscaling=True):
         rgb_array = self.env.render(mode=mode, image_size=image_size, color=color, camera_id=camera_id,
@@ -132,6 +125,8 @@ class PybulletEnv(gym.Wrapper):
         # if self.env.robot.__class__.__name__ == 'InvertedPendulumSwingup':
         done = self._termination() or info['not alive']  # not "or done" because modified in /gym/wrappers/time_limit.py
         reward = r * self.rewardFactor
+        if self.renders:
+            self.env.render(mode='human')
         return obs, reward, done, info
 
     def get_info(self):
