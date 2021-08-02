@@ -46,11 +46,12 @@ pip install opencv-python==4.1.2.30
 ```
 
 
-# Examples usage
+# Usage
 
 Example to run and visualize `ReacherBulletEnv-v0` with a randomly moving ball (`distractor=True`), where the observation space is chosen to be the camera:
 ```python
-import gym 
+import gym
+
 "register bullet_envs in gym"
 import bullet_envs.__init__
 
@@ -58,15 +59,16 @@ env_name = 'ReacherBulletEnv-v0'
 actionRepeat = 1
 maxSteps = 50
 "OpenAI Gym env creation"
-env = gym.make('PybulletEnv-v0',env_name=env_name, renders=True,  distractor=True, actionRepeat=actionRepeat,maxSteps=maxSteps * actionRepeat, image_size=64, display_target=True)
+env = gym.make('PybulletEnv-v0', env_name=env_name, renders=True, distractor=True, actionRepeat=actionRepeat,
+               maxSteps=maxSteps * actionRepeat, image_size=64, display_target=True)
 
 "running env on 5 episodes"
 num_ep = 5
-for episode in range(num_ep): 
+for episode in range(num_ep):
     obs = env.reset()
     done = False
     while not done:
-    	# follow a random policy
+        # follow a random policy
         action = env.action_space.sample()
         obs, reward, done, info = env.step(action)
         "get the image observation from the camera"
@@ -75,7 +77,8 @@ for episode in range(num_ep):
 
 Example to run and visualize `TurtlebotMazeEnv-v0` with a randomly sampled wall color (`wallDistractor=True`), where the observation space is chosen to be the first-person camera:
 ```python
-import gym 
+import gym
+
 "register bullet_envs in gym"
 import bullet_envs.__init__
 
@@ -83,11 +86,11 @@ env_name = 'TurtlebotMazeEnv-v0'
 actionRepeat = 1
 maxSteps = 100
 "OpenAI Gym env creation"
-env = gym.make(env_name, renders=True,  wallDistractor=True,maxSteps=maxSteps, image_size=64, display_target=True)
+env = gym.make(env_name, renders=True, wallDistractor=True, maxSteps=maxSteps, image_size=64, display_target=True)
 
 "running env on 2 episodes"
 num_ep = 2
-for episode in range(num_ep): 
+for episode in range(num_ep):
     obs = env.reset()
     done = False
     while not done:
