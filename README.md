@@ -3,6 +3,10 @@
 
 
 
+https://user-images.githubusercontent.com/62666911/127876105-f851cf18-5793-4cff-ad18-fb53634d36dc.mp4
+
+
+
 # bullet_envs
 
 It is a library that provides environments similar to those provided by [MuJoCo](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.296.6848&rep=rep1&type=pdf) which are fully compatible with [OpenAI Gym](https://arxiv.org/abs/1606.01540), with the difference of being open-source.
