@@ -23,7 +23,7 @@ Only the following environments are fully supported:
 
 * All environments have a camera rendering in `def render` which is wrapped into an OpenAI gym wrapper.
 
-* `TurtlebotMazeEnv-v0` is proposed here as a new environment, built from the original `Turtebot` implemented in [`pybullet_robots`](https://github.com/erwincoumans/pybullet_robots). The observation space corresponds to a first-person perspective camera.
+* `TurtlebotMazeEnv-v0` is proposed here as a new environment, built from the original `Turtebot` implemented in [pybullet_robots](https://github.com/erwincoumans/pybullet_robots). The observation space corresponds to a first-person perspective camera.
 
 * `ReacherBulletEnv-v0` has a new version with a randomly moving ball as a distractor which corresponds to the file `reacher_distractor.xml`
 
