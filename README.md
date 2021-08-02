@@ -39,7 +39,11 @@ cd <installation_path_of_your_choice>
 git clone https://github.com/astrid-merckling/bullet_envs.git
 cd bullet_envs
 export PYTHONPATH=$(pwd):${PYTHONPATH}
+```
 
+
+You can install the dependencies as:
+```bash
 pip install gym==0.17.2
 pip install pybullet==2.6.4
 pip install opencv-python==4.1.2.30
