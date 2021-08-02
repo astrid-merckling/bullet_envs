@@ -14,9 +14,9 @@ It is based on the original environments provided in [pybullet_envs](https://git
 
 
 Only the following environments are fully supported:
-* `TurtlebotMazeEnv-v0`,
-* `ReacherBulletEnv-v0`,
-* `HalfCheetahBulletEnv-v0`,
+* `TurtlebotMazeEnv-v0`
+* `ReacherBulletEnv-v0`
+* `HalfCheetahBulletEnv-v0`
 * `InvertedPendulumSwingupBulletEnv-v0`
 
 # Contributions
