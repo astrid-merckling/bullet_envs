@@ -149,7 +149,7 @@ class MJCFBaseBulletEnv(gym.Env):
             if self.__class__.__name__ == 'ReacherBulletEnv':
                 cam_pos = [0, 0., 0.]
                 cam_pitch = -90
-                cam_yaw = 180
+                cam_yaw = 0
                 cam_dist = 0.5
             if self.__class__.__name__ in ['InvertedPendulumSwingupBulletEnv', 'InvertedDoublePendulumBulletEnv']:
                 if self.__class__.__name__ == 'InvertedPendulumSwingupBulletEnv':
