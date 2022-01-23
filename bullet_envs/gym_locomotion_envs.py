@@ -2,32 +2,49 @@ from .scene_stadium import SinglePlayerStadiumScene
 from .env_bases import MJCFBaseBulletEnv
 import numpy as np
 import pybullet
-from robot_locomotors import Hopper, Walker2D, HalfCheetah, Ant, Humanoid, HumanoidFlagrun, HumanoidFlagrunHarder
+from robot_locomotors import (
+    Hopper,
+    Walker2D,
+    HalfCheetah,
+    Ant,
+    Humanoid,
+    HumanoidFlagrun,
+    HumanoidFlagrunHarder,
+)
 
 
 class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
-
-    def __init__(self, robot, renders=False,doneAlive=True,actionRepeat=1,seed=None):
+    def __init__(self, robot, renders=False, doneAlive=True, actionRepeat=1, seed=None):
         # print("WalkerBase::__init__ start")
         self.camera_x = 0
         self.walk_target_x = 1e3  # kilometer away
         self.walk_target_y = 0
         self.stateId = -1
 
-        self.electricity_cost = -1.0  # cost for using motors -- this parameter should be carefully tuned against reward for making progress, other values less improtant
-        self.stall_torque_cost = -0.1  # cost for running electric current through a motor even at zero rotational speed, small
-        self.foot_collision_cost = -1.0  # touches another leg, or other objects, that cost makes robot avoid smashing feet into itself
-        self.foot_ground_object_names = set(["floor"])  # to distinguish ground and other objects
+        self.electricity_cost = (
+            -1.0
+        )  # cost for using motors -- this parameter should be carefully tuned against reward for making progress, other values less improtant
+        self.stall_torque_cost = (
+            -0.1
+        )  # cost for running electric current through a motor even at zero rotational speed, small
+        self.foot_collision_cost = (
+            -1.0
+        )  # touches another leg, or other objects, that cost makes robot avoid smashing feet into itself
+        self.foot_ground_object_names = set(
+            ["floor"]
+        )  # to distinguish ground and other objects
         self.joints_at_limit_cost = -0.1  # discourage stuck joints
 
-        MJCFBaseBulletEnv.__init__(self, robot,renders,doneAlive,actionRepeat,seed)
+        MJCFBaseBulletEnv.__init__(self, robot, renders, doneAlive, actionRepeat, seed)
 
     def create_single_player_scene(self, bullet_client):
         frame_skip = 4
-        self.stadium_scene = SinglePlayerStadiumScene(bullet_client,
-                                                      gravity=9.8,
-                                                      timestep=0.0165 / frame_skip,
-                                                      frame_skip=frame_skip)
+        self.stadium_scene = SinglePlayerStadiumScene(
+            bullet_client,
+            gravity=9.8,
+            timestep=0.0165 / frame_skip,
+            frame_skip=frame_skip,
+        )
         return self.stadium_scene
 
     def reset(self):
@@ -35,18 +52,29 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
         #     self.stepBeforeReset = 10 * self.actionRepeat
         #     self.stepBeforeResetCount = 0
         self.rewardProgress = 0
-        if (self.stateId >= 0):
+        if self.stateId >= 0:
             self._p.restoreState(self.stateId)
 
         r = MJCFBaseBulletEnv.reset(self)
         self._p.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 0)
 
-        self.parts, self.jdict, self.ordered_joints, self.robot_body = self.robot.addToScene(
-            self._p, self.stadium_scene.ground_plane_mjcf)
-        self.ground_ids = set([(self.parts[f].bodies[self.parts[f].bodyIndex],
-                                self.parts[f].bodyPartIndex) for f in self.foot_ground_object_names])
+        (
+            self.parts,
+            self.jdict,
+            self.ordered_joints,
+            self.robot_body,
+        ) = self.robot.addToScene(self._p, self.stadium_scene.ground_plane_mjcf)
+        self.ground_ids = set(
+            [
+                (
+                    self.parts[f].bodies[self.parts[f].bodyIndex],
+                    self.parts[f].bodyPartIndex,
+                )
+                for f in self.foot_ground_object_names
+            ]
+        )
         self._p.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 1)
-        if (self.stateId < 0):
+        if self.stateId < 0:
             self.stateId = self._p.saveState()
             # print("saving state self.stateId:",self.stateId)
         return r
@@ -57,7 +85,7 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
             # if self._alive < 0:
             #     self.stepBeforeResetCount +=1
             # return self.stepBeforeResetCount > self.stepBeforeReset
-        else: 
+        else:
             return False
 
     def move_robot(self, init_x, init_y, init_z):
@@ -69,29 +97,33 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
         )  # Works because robot loads around (0,0,0), and some robots have z != 0 that is left intact
         self.cpp_robot.set_pose(pose)
 
-
-
     def step(self, a):
-        if not self.scene.multiplayer:  # if multiplayer, action first applied to all robots, then global step() called, then _step() for all robots with the same actions
+        if (
+            not self.scene.multiplayer
+        ):  # if multiplayer, action first applied to all robots, then global step() called, then _step() for all robots with the same actions
             self.robot.apply_action(a)
             self.scene.global_step()
         "calc_state() always to be executed before calc_potential()"
         state = self.robot.calc_state()  # also calculates self.joints_at_limit
 
         # Only for HalfCheetah:
-        for i, f in enumerate(self.robot.feet):  # TODO: Maybe calculating feet contacts could be done within the robot code
+        for i, f in enumerate(
+            self.robot.feet
+        ):  # TODO: Maybe calculating feet contacts could be done within the robot code
             contact_ids = set((x[2], x[4]) for x in f.contact_list())
             # print("CONTACT OF '%d' WITH %d" % (contact_ids, ",".join(contact_names)) )
-            if (self.ground_ids & contact_ids):
+            if self.ground_ids & contact_ids:
                 # see Issue 63: https://github.com/openai/roboschool/issues/63
                 # feet_collision_cost += self.foot_collision_cost
                 self.robot.feet_contact[i] = 1.0
             else:
                 self.robot.feet_contact[i] = 0.0
 
-        self._alive = float(self.robot.alive_bonus(
-                state[0] + self.robot.initial_z,
-                self.robot.body_rpy[1]))  # state[0] is body height above ground, body_rpy[1] is pitch
+        self._alive = float(
+            self.robot.alive_bonus(
+                state[0] + self.robot.initial_z, self.robot.body_rpy[1]
+            )
+        )  # state[0] is body height above ground, body_rpy[1] is pitch
         done = self._isDone()
         if not np.isfinite(state).all():
             print("~INF~", state)
@@ -101,12 +133,14 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
         self.potential = self.robot.calc_potential()
         progress = float(self.potential - potential_old)
         electricity_cost = self.stall_torque_cost * float(np.square(a).mean())
-        joints_at_limit_cost = float(self.joints_at_limit_cost * self.robot.joints_at_limit)
+        joints_at_limit_cost = float(
+            self.joints_at_limit_cost * self.robot.joints_at_limit
+        )
 
         debugmode = 0
-        if (debugmode):
+        if debugmode:
             # print("alive=", self._alive)
-            if self._alive <0:
+            if self._alive < 0:
                 print("alive=", self._alive)
             # print("progress",progress)
             # print("electricity_cost",electricity_cost)
@@ -116,13 +150,13 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
 
         # electricity_cost += self.electricity_cost * float(np.abs(a * self.robot.joint_speeds).mean())  # let's assume we have DC motor with controller, and reverse current braking
 
-        self.rewards = [self._alive,progress, electricity_cost]
+        self.rewards = [self._alive, progress, electricity_cost]
         # self.rewards = [self._alive, progress, electricity_cost, joints_at_limit_cost]
         # do nothing: self.HUD(state, a, done)
         # Update total self.reward
         self.rewardProgress += progress
 
-        return state, sum(self.rewards), bool(done), {'not alive':done}
+        return state, sum(self.rewards), bool(done), {"not alive": done}
 
     def camera_adjust(self):
         x, y, z = self.body_xyz
@@ -131,38 +165,84 @@ class WalkerBaseBulletEnv(MJCFBaseBulletEnv):
 
 
 class HopperBulletEnv(WalkerBaseBulletEnv):
-
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = Hopper(randomExplor=randomExplor)
-        WalkerBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        WalkerBaseBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
 
 class Walker2DBulletEnv(WalkerBaseBulletEnv):
-
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = Walker2D(randomExplor=randomExplor)
-        WalkerBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        WalkerBaseBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
 
 class HalfCheetahBulletEnv(WalkerBaseBulletEnv):
-
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = HalfCheetah(randomExplor=randomExplor)
-        WalkerBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        WalkerBaseBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
 
 class AntBulletEnv(WalkerBaseBulletEnv):
-
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = Ant()
-        WalkerBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        WalkerBaseBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
 
 class HumanoidBulletEnv(WalkerBaseBulletEnv):
-
-    def __init__(self, robot=Humanoid(), renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        robot=Humanoid(),
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = robot(randomExplor=randomExplor)
-        WalkerBaseBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        WalkerBaseBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
         self.electricity_cost = 4.25 * WalkerBaseBulletEnv.electricity_cost
         self.stall_torque_cost = 4.25 * WalkerBaseBulletEnv.stall_torque_cost
 
@@ -170,9 +250,19 @@ class HumanoidBulletEnv(WalkerBaseBulletEnv):
 class HumanoidFlagrunBulletEnv(HumanoidBulletEnv):
     random_yaw = True
 
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = HumanoidFlagrun(randomExplor=randomExplor)
-        HumanoidBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        HumanoidBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
     def create_single_player_scene(self, bullet_client):
         s = HumanoidBulletEnv.create_single_player_scene(self, bullet_client)
@@ -183,10 +273,22 @@ class HumanoidFlagrunBulletEnv(HumanoidBulletEnv):
 class HumanoidFlagrunHarderBulletEnv(HumanoidBulletEnv):
     random_lean = True  # can fall on start
 
-    def __init__(self, renders=False, doneAlive=True,actionRepeat=1,randomExplor=True,distractor=False,seed=None):
+    def __init__(
+        self,
+        renders=False,
+        doneAlive=True,
+        actionRepeat=1,
+        randomExplor=True,
+        distractor=False,
+        seed=None,
+    ):
         self.robot = HumanoidFlagrunHarder(randomExplor=randomExplor)
-        self.electricity_cost /= 4  # don't care that much about electricity, just stand up!
-        HumanoidBulletEnv.__init__(self, self.robot, renders,doneAlive,actionRepeat,seed)
+        self.electricity_cost /= (
+            4  # don't care that much about electricity, just stand up!
+        )
+        HumanoidBulletEnv.__init__(
+            self, self.robot, renders, doneAlive, actionRepeat, seed
+        )
 
     def create_single_player_scene(self, bullet_client):
         s = HumanoidBulletEnv.create_single_player_scene(self, bullet_client)
